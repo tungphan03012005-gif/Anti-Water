@@ -1,0 +1,43 @@
+-- Anti-Water Tăng Thêm Độ Cao cho Disaster Island Survival
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- Tạo platform nâng đỡ (Khối xanh biển mờ)
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(35, 1, 35)
+platform.Anchored = true
+platform.CanCollide = false
+platform.Transparency = 0.5 
+platform.Color = Color3.fromRGB(0, 170, 255)
+platform.Material = Enum.Material.Neon
+platform.Name = "SafePlatform"
+platform.Parent = workspace
+
+RunService.Heartbeat:Connect(function()
+    local char = player.Character
+    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+    
+    local root = char.HumanoidRootPart
+    
+    if root.Position.Y < 45 then
+        local raycastParams = RaycastParams.new()
+        raycastParams.FilterDescendantsInstances = {char, platform}
+        raycastParams.FilterType = Enum.RaycastFilterType.Exclude
+        
+        local result = workspace:Raycast(root.Position, Vector3.new(0, -40, 0), raycastParams)
+        
+        local targetY = 5.2
+        
+        if result and (result.Material == Enum.Material.Water or result.Instance.Name:lower():find("water") or result.Instance.Name:lower():find("ocean")) then
+            -- Tăng thêm khoảng cách so với mặt nước để nhích cao hơn nữa
+            targetY = result.Position.Y + 3.8
+        end
+        
+        platform.CFrame = CFrame.new(root.Position.X, targetY, root.Position.Z)
+        platform.CanCollide = true
+    else
+        platform.CanCollide = false
+        platform.CFrame = CFrame.new(0, -1000, 0)
+    end
+end)
